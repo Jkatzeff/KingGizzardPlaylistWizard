@@ -4,7 +4,7 @@ import './App.css';
 var Spotify = require('spotify-web-api-js');
 var spotifyWebApi = new Spotify();
 
-const gizzAPI = "spotify:artist:6XYvaoDGE0VmRt83Jss9Sn"
+const gizzURI = "spotify:artist:6XYvaoDGE0VmRt83Jss9Sn"
 const gizzId = "6XYvaoDGE0VmRt83Jss9Sn"
 
 function sleep (time) {
@@ -40,7 +40,8 @@ class App extends SpotifyAPIHandler {
       playlists: [],
       newPlaylistId: '',
       numPlaylists: 5,
-      gizzTracks: [{URI: ''}]
+      gizzTracks: [{URI: ''}],
+      gizzAlbums: []
     }
       this.getCurrentUser=this.getCurrentUser.bind(this);
       this.getNumberOfPlaylists=this.getNumberOfPlaylists.bind(this);
@@ -92,6 +93,13 @@ class App extends SpotifyAPIHandler {
         this.setState({gizzTracks: arr})
       }
     )
+  }
+  getArtistAlbums(){
+    this.spotifyAPICall("getArtistAlbums", [gizzId], (response) =>
+    {
+      console.log(response);
+      this.setState({gizzAlbums: response.items.reduce((acc, curr) => acc.concat(<div>{curr.name}<br/></div>), [])})
+    })
   }
   getPlaylists(){
     let promiseWithThis = (t) => new Promise(function(resolve, reject){
@@ -146,6 +154,10 @@ class App extends SpotifyAPIHandler {
           <div>{this.state.gizzTracks.reduce((acc, curr) => acc.concat(<div>{curr.title}</div>), [])}
             <iframe allow="encrypted-media" src={"https://open.spotify.com/embed/track/" + this.state.gizzTracks[0].URI.split(":")[2]}/>
           </div>
+        </div>
+        <div>
+          <button onClick={()=>this.getArtistAlbums()}>Get Gizz Albums</button>
+          <div>{this.state.gizzAlbums}</div>
         </div>
         <div>
           Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
