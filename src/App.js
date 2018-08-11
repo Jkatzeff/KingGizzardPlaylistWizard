@@ -3,6 +3,10 @@ import spotifyLogo from './spotify-logo.svg';
 import './App.css';
 var Spotify = require('spotify-web-api-js');
 var spotifyWebApi = new Spotify();
+
+const gizzAPI = "spotify:artist:6XYvaoDGE0VmRt83Jss9Sn"
+const gizzId = "6XYvaoDGE0VmRt83Jss9Sn"
+
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -34,7 +38,8 @@ class App extends SpotifyAPIHandler {
       userId: '',
       playlists: [],
       newPlaylistId: '',
-      numPlaylists: 5
+      numPlaylists: 5,
+      gizzTracks: []
     }
       this.getCurrentUser=this.getCurrentUser.bind(this);
       this.getNumberOfPlaylists=this.getNumberOfPlaylists.bind(this);
@@ -67,6 +72,18 @@ class App extends SpotifyAPIHandler {
   getNumberOfPlaylists(){
     var num = document.getElementById("numberofplaylists").value;
     this.setState({numPlaylists: num});
+  }
+  getArtistTracks(){
+    this.spotifyAPICall("getArtistTopTracks", [gizzId, "AU"], (response) =>
+      {
+        let arr = Object.keys(response.tracks).map((index) => 
+          {
+            const track = response.tracks[index];
+            return (<div key={track.name}>{"title: " + track.name +  " album: " +track.album.name+" uri "+ track.uri+ " length: " + track.duration_ms/1000 + " seconds"+ " popularity: " + track.popularity+ " track number: " + track.track_number}</div>)
+          }).reduce((acc, curr) => acc.concat(curr), [])
+        this.setState({gizzTracks: arr})
+      }
+    )
   }
   getPlaylists(){
     let promiseWithThis = (t) => new Promise(function(resolve, reject){
@@ -115,6 +132,10 @@ class App extends SpotifyAPIHandler {
         <div> Number of playlists to grab: 
           <input type="text" id="numberofplaylists"/>
           <button onClick={()=>this.getPlaylists()}>Clicky!</button>
+        </div>
+        <div>
+          <button onClick={() => this.getArtistTracks()}>Log top gizz tracks</button>
+          <div>{this.state.gizzTracks}</div>
         </div>
         <div>
           Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
