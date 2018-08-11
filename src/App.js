@@ -41,7 +41,8 @@ class App extends SpotifyAPIHandler {
       newPlaylistId: '',
       numPlaylists: 5,
       gizzTracks: [{URI: ''}],
-      gizzAlbums: []
+      gizzAlbums: [],
+      allTracks: []
     }
       this.getCurrentUser=this.getCurrentUser.bind(this);
       this.getNumberOfPlaylists=this.getNumberOfPlaylists.bind(this);
@@ -97,8 +98,20 @@ class App extends SpotifyAPIHandler {
   getArtistAlbums(){
     this.spotifyAPICall("getArtistAlbums", [gizzId], (response) =>
     {
-      console.log(response);
-      this.setState({gizzAlbums: response.items.reduce((acc, curr) => acc.concat(<div>{curr.name+" "+curr.id}<br/></div>), [])})
+      this.setState({gizzAlbums: response.items.reduce((acc, curr) => acc.concat({name: curr.name, id: curr.id}), [])})
+    })
+  }
+  getTracksFromAlbums(){
+    var t = this;
+    const albums = t.state.gizzAlbums.slice()
+    albums.forEach(function(album){
+      const albumId = album.id;
+      t.spotifyAPICall("getAlbumTracks", [albumId], (response) => {
+        const prev = t.state.allTracks.slice();
+        const newTracks = Object.keys(response.items).map((index) => {return {title: response.items[index].name, URI: response.items[index].uri}})
+        t.setState({allTracks: prev.concat(newTracks)})
+      }
+      )
     })
   }
   getPlaylists(){
@@ -118,7 +131,7 @@ class App extends SpotifyAPIHandler {
                                       .reduce((acc,curr) => acc.concat(curr), [])
                                       .filter(entry => entry!==null)
                                       .slice(0, numPlaylists);
-          console.log(arr);
+          // console.log(arr);
           this.setState({playlists: arr})    
         })
 
@@ -157,7 +170,11 @@ class App extends SpotifyAPIHandler {
         </div>
         <div>
           <button onClick={()=>this.getArtistAlbums()}>Get Gizz Albums</button>
-          <div>{this.state.gizzAlbums}</div>
+          <div>{Object.keys(this.state.gizzAlbums).map((index) =><div>{this.state.gizzAlbums[index].name}</div>)}</div>
+        </div>
+        <div>
+          <button onClick={()=>{this.getTracksFromAlbums()}}>Get ALL Tracks</button>
+          <div>{this.state.allTracks.map((song) => <div>{song.title + " " + song.URI}</div>)}</div>
         </div>
         <div>
           Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
