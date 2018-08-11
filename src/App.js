@@ -98,7 +98,7 @@ class App extends SpotifyAPIHandler {
     this.spotifyAPICall("getArtistAlbums", [gizzId], (response) =>
     {
       console.log(response);
-      this.setState({gizzAlbums: response.items.reduce((acc, curr) => acc.concat(<div>{curr.name}<br/></div>), [])})
+      this.setState({gizzAlbums: response.items.reduce((acc, curr) => acc.concat(<div>{curr.name+" "+curr.id}<br/></div>), [])})
     })
   }
   getPlaylists(){
