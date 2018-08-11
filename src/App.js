@@ -35,11 +35,12 @@ class App extends SpotifyAPIHandler {
         artist: '',
         album: ''
       },
+      topTracks: [],
       userId: '',
       playlists: [],
       newPlaylistId: '',
       numPlaylists: 5,
-      gizzTracks: []
+      gizzTracks: [{URI: ''}]
     }
       this.getCurrentUser=this.getCurrentUser.bind(this);
       this.getNumberOfPlaylists=this.getNumberOfPlaylists.bind(this);
@@ -79,7 +80,14 @@ class App extends SpotifyAPIHandler {
         let arr = Object.keys(response.tracks).map((index) => 
           {
             const track = response.tracks[index];
-            return (<div key={track.name}>{"title: " + track.name +  " album: " +track.album.name+" uri "+ track.uri+ " length: " + track.duration_ms/1000 + " seconds"+ " popularity: " + track.popularity+ " track number: " + track.track_number}</div>)
+            return ({
+              title: track.name,
+              album: track.album.name,
+              URI: track.uri,
+              length: track.duration_ms/1000,
+              popularity: track.popularity,
+              href: track.href
+            })
           }).reduce((acc, curr) => acc.concat(curr), [])
         this.setState({gizzTracks: arr})
       }
@@ -135,7 +143,9 @@ class App extends SpotifyAPIHandler {
         </div>
         <div>
           <button onClick={() => this.getArtistTracks()}>Log top gizz tracks</button>
-          <div>{this.state.gizzTracks}</div>
+          <div>{this.state.gizzTracks.reduce((acc, curr) => acc.concat(<div>{curr.title}</div>), [])}
+            <iframe allow="encrypted-media" src={"https://open.spotify.com/embed/track/" + this.state.gizzTracks[0].URI.split(":")[2]}/>
+          </div>
         </div>
         <div>
           Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
