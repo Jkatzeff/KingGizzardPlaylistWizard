@@ -257,7 +257,7 @@ class NowPlaying extends Component {
   }
   render() {
     return (
-      this.state.loggedIn ? <div>{this.displayInfo(["name", "artist", "album"])}</div>
+      this.state.loggedIn ? <div>Now Playing: <br/>{this.displayInfo(["name", "artist", "album"])}</div>
                           : this.getAuthorization()
 
     )
