@@ -7,7 +7,11 @@ var spotifyWebApi = new Spotify();
 const gizzURI = "spotify:artist:6XYvaoDGE0VmRt83Jss9Sn"
 const gizzId = "6XYvaoDGE0VmRt83Jss9Sn"
 
-// Object.prototype.map = (func) => Object.keys(this).map(func);
+Object.prototype.map = function(f){
+  return Object.keys(this).map((index) => (this[index] ? f(this[index]) : null));
+}
+
+// (func) => Object.keys(this).map(func);
 
 
 function getHashParams() {
@@ -21,7 +25,9 @@ function getHashParams() {
 }
 function spotifyAPICall(callName, args, body, _callback){
   spotifyWebApi[callName](...args).then((response) => {body(response)});
-  _callback();
+  if(_callback){
+    _callback();
+  }
 }
 class App extends Component {
   constructor(props) {
@@ -77,15 +83,13 @@ class TopArtists extends Component {
           // console.log(response);
       if(response.items){
         console.log(response.items);
-        let artists = Object.keys(response.items).map((index) =>
+        let artists = response.items.map((artist) =>
           {
-            let artist = response.items[index];
             return({name: artist.name,
              artistId: artist.id,
              genres: artist.genres
             })
-          }
-        )
+          })
       this.setState({artists: artists});
       clearInterval(this.timerID);
       }else{
