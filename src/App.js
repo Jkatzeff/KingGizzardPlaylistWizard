@@ -10,6 +10,15 @@ const gizzId = "6XYvaoDGE0VmRt83Jss9Sn"
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
+function getHashParams() {
+  var hashParams = {};
+  var e, r = /([^&;=]+)=?([^&;]*)/g,
+      q = window.location.hash.substring(1);
+  while ( e = r.exec(q)) {
+     hashParams[e[1]] = decodeURIComponent(e[2]);
+  }
+  return hashParams;
+}
 class SpotifyAPIHandler extends Component {
   constructor(){
     super();
@@ -25,7 +34,7 @@ class SpotifyAPIHandler extends Component {
 class App extends SpotifyAPIHandler {
   constructor(props) {
     super();
-    const params = this.getHashParams();
+    const params = getHashParams();
     const token = params.access_token
     this.state = {
       loggedIn: token ? true : false,
@@ -51,22 +60,6 @@ class App extends SpotifyAPIHandler {
     if (token){
       spotifyWebApi.setAccessToken(token)
     }
-  }
-  getHashParams() {
-    var hashParams = {};
-    var e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
-    while ( e = r.exec(q)) {
-       hashParams[e[1]] = decodeURIComponent(e[2]);
-    }
-    return hashParams;
-  }
-  // spotifyAPICall(callName, args, body){
-  //   spotifyWebApi[callName](...args).then((response) => {body(response)})
-  // }
-  getAll(){
-    this.getCurrentUser()
-    this.getNowPlaying()
   }
   getCurrentUser(){
     this.spotifyAPICall("getMe", [], (response) => 
@@ -115,6 +108,8 @@ class App extends SpotifyAPIHandler {
     })
   }
   getPlaylists(){
+    // let userPromise = (t) => new Promise(function(resolve, reject){t.getCurrentUser(); resolve(this.state.userId)})
+    // let playlistPromise = (t) => new Promise(fun)
     let promiseWithThis = (t) => new Promise(function(resolve, reject){
       t.getCurrentUser();
       t.getNumberOfPlaylists();
@@ -131,7 +126,6 @@ class App extends SpotifyAPIHandler {
                                       .reduce((acc,curr) => acc.concat(curr), [])
                                       .filter(entry => entry!==null)
                                       .slice(0, numPlaylists);
-          // console.log(arr);
           this.setState({playlists: arr})    
         })
 
@@ -161,24 +155,17 @@ class App extends SpotifyAPIHandler {
         <div> Number of playlists to grab: 
           <input type="text" id="numberofplaylists"/>
           <button onClick={()=>this.getPlaylists()}>Clicky!</button>
-        </div>
-        <div>
-          <button onClick={() => this.getArtistTracks()}>Log top gizz tracks</button>
-          <div>{this.state.gizzTracks.reduce((acc, curr) => acc.concat(<div>{curr.title}</div>), [])}
-            <iframe allow="encrypted-media" src={"https://open.spotify.com/embed/track/" + this.state.gizzTracks[0].URI.split(":")[2]}/>
-          </div>
+          <br />Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
         </div>
         <div>
           <button onClick={()=>this.getArtistAlbums()}>Get Gizz Albums</button>
-          <div>{Object.keys(this.state.gizzAlbums).map((index) =><div>{this.state.gizzAlbums[index].name}</div>)}</div>
+          <div>{Object.keys(this.state.gizzAlbums).map((index) =><div key={this.state.gizzAlbums[index].name}>{this.state.gizzAlbums[index].name}</div>)}</div>
         </div>
         <div>
           <button onClick={()=>{this.getTracksFromAlbums()}}>Get ALL Tracks</button>
-          <div>{this.state.allTracks.map((song) => <div>{song.title + " " + song.URI}</div>)}</div>
+          <div>{this.state.allTracks.map((song) => <div key={song.URI}>{song.title + " " + song.URI}</div>)}</div>
         </div>
-        <div>
-          Recent Playlists: <PlaylistsRendered playlists={this.state.playlists} />
-        </div>
+
         <div>
           <input type="text" id="textbox"/>
           <button onClick={() => this.createPlaylist(this.state.userId, document.getElementById("textbox").value)}>Create Playlist!</button>
@@ -203,17 +190,6 @@ function PlaylistsRendered(props){
   return (props.playlists.map((k,v) => <div key={k}>{k}</div>)
                               .reduce((acc,curr) => acc.concat(curr), []))
 }
-
-// class PlaylistHandler extends Component{
-//   constructor(props){
-//     super(props);
-//     this.state = {
-//       userId: props.userId,
-
-//     }
-//   }
-// }
-
 class NowPlaying extends Component {
   constructor(props){
     super(props);
@@ -280,9 +256,5 @@ class NowPlaying extends Component {
     )
   }
 }
-
-
-
-
 
 export default App;
