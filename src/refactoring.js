@@ -111,7 +111,7 @@ class TopArtists extends Component {
   render(){
     // console.log(this.state.artists);
     return(<div>{this.state.artists.map((item) =>
-        <InfoDisplayer key={item.name} loggedIn={this.state.loggedIn} types={["name", "artistId", "genres"]} data={item}/>
+        <InfoDisplayer key={item.name} loggedIn={this.state.loggedIn} types={["name"/*, "artistId", "genres"*/]} data={item}/>
       )}</div>)
   }
 }
