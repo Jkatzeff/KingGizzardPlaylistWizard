@@ -63,11 +63,15 @@ class App extends Component {
     return(
       <div className="App">
         <NowPlaying loggedIn={this.loggedIn}/>
+        <br/>
         <div>{this.state.loggedIn ? <TopArtists loggedIn={this.loggedIn}/> : null}</div>
       </div>
     )
   }
 }
+
+
+
 class TopArtists extends Component {
   constructor(props){
     super(props);
@@ -111,7 +115,7 @@ class TopArtists extends Component {
   render(){
     // console.log(this.state.artists);
     return(<div>{this.state.artists.map((item) =>
-        <InfoDisplayer key={item.name} loggedIn={this.state.loggedIn} types={["name"/*, "artistId", "genres"*/]} data={item}/>
+        <InfoDisplayer key={item.name} loggedIn={this.state.loggedIn} types={["name", "artistId", "genres"]} data={item}/>
       )}</div>)
   }
 }
@@ -183,7 +187,7 @@ function InfoDisplayer(props){
   const types = props.types;
   const data = props.data;
   const imageDisplay =data.image ? <div key={data.image+"a"}><img src= {data.image} style={{width: 200}}/></div> : null
-  const info = (types.map((type, index) => <NameDisplayer key={type} loggedIn={loggedIn} item={data[type]} simple={index}/>));
+  const info = (types.map((type, index) => <NameDisplayer key={type} loggedIn={loggedIn} item={data[type]+ " "} simple={index}/>));
   return (
     <div>
     <div>{[imageDisplay].concat(info)}</div></div>
